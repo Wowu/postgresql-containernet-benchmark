@@ -1,0 +1,17 @@
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt update -qq && apt install -y -qq curl net-tools iproute2 iputils-ping postgresql && apt clean
+RUN curl -s https://packagecloud.io/install/repositories/akopytov/sysbench/script.deb.sh | bash
+RUN apt update -qq && apt install -y -qq sysbench && apt clean
+
+
+# docker build -t sysbench:latest -f Dockerfile.benchmark .
+
+
+# sysbench --db-driver=pgsql --pgsql-user=postgres --pgsql-password=postgres --pgsql-db=postgres --threads=1 --oltp-table-size=1000 --oltp-tables-count=12 /usr/share/sysbench/tests/include/oltp_legacy/parallel_prepare.lua run
+
+# sysbench --db-driver=pgsql --pgsql-user=postgres --pgsql-password=postgres --pgsql-db=postgres oltp_read_write prepare
+# sysbench --db-driver=pgsql --pgsql-user=postgres --pgsql-password=postgres --pgsql-db=postgres oltp_read_write run
+# sysbench --db-driver=pgsql --pgsql-user=postgres --pgsql-password=postgres --pgsql-db=postgres oltp_read_write cleanup

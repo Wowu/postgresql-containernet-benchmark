@@ -1,0 +1,7 @@
+FROM bitnami/postgresql:14
+
+USER root
+RUN apt update -qq && apt install -y -qq net-tools iproute2 iputils-ping && apt clean
+# USER 1001
+
+# docker build -t tip-postgres:latest -f Dockerfile.postgres .
