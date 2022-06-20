@@ -2,6 +2,8 @@
 
 Tested on Ubuntu 20.04.
 
+![](network.excalidraw.png)
+
 ## Setup
 
 1. Install ansible
