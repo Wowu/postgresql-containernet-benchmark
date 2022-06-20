@@ -142,7 +142,7 @@ if __name__ == '__main__':
   net.addLink(primary, s1, cls=TCLink, bw=100)
 
   for replica in replicas:
-      net.addLink(replica, s1, cls=TCLink, bw=100, delay=args.delay, loss=args.loss)
+      net.addLink(replica, s1, cls=TCLink, bw=100, delay=f"{args.delay}ms", loss=args.loss)
 
 
   net.addLink(benchmark, s1, cls=TCLink, bw=100)
