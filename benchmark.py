@@ -99,7 +99,7 @@ if __name__ == '__main__':
           "POSTGRESQL_USERNAME": "postgres",
           "POSTGRESQL_PASSWORD": "postgres",
           "POSTGRESQL_DATABASE": "postgres",
-          "POSTGRESQL_SYNCHRONOUS_COMMIT_MODE": "on",
+          "POSTGRESQL_SYNCHRONOUS_COMMIT_MODE": "remote_apply",
           "POSTGRESQL_NUM_SYNCHRONOUS_REPLICAS": args.replicas,
           "ALLOW_EMPTY_PASSWORD": "yes"
       },
@@ -139,13 +139,13 @@ if __name__ == '__main__':
 
   green('====> Setup network')
   s1 = net.addSwitch('s1')
-  net.addLink(primary, s1, cls=TCLink, bw=100, delay=args.delay, loss=args.loss)
+  net.addLink(primary, s1, cls=TCLink, bw=100)
 
   for replica in replicas:
       net.addLink(replica, s1, cls=TCLink, bw=100, delay=args.delay, loss=args.loss)
 
 
-  net.addLink(benchmark, s1, cls=TCLink, bw=100, delay=args.delay, loss=args.loss)
+  net.addLink(benchmark, s1, cls=TCLink, bw=100)
   net.start()
 
   green('====> Wait for replication setup')
