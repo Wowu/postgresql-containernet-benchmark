@@ -25,7 +25,9 @@ def parse_args():
   parser.add_argument('--primary-cpu', type=float, default=0.5, help='Primary CPU quota (default: 0.5)')
   parser.add_argument('--replica-cpu', type=float, default=0.5, help='Replica CPU quota (default: 0.5)')
   parser.add_argument('--primary-memory', type=float, default=1000, help='Primary memory quota (in MB, default: 1000)')
+  parser.add_argument('--primary-swap-memory', type=float, default=0, help='Primary swap memory quota (in MB, default: 0)')
   parser.add_argument('--replica-memory', type=float, default=1000, help='Replica memory quota (in MB, default: 1000)')
+  parser.add_argument('--replica-swap-memory', type=float, default=0, help='Replica swap memory quota (in MB, default: 0)')
 
   return parser.parse_args()
 
@@ -94,6 +96,7 @@ if __name__ == '__main__':
       cpu_period=100000,
       cpu_quota=int(args.primary_cpu * 100000),
       mem_limit=int(args.primary_memory) * 1024 * 1024,
+      memswap_limit=int(args.primary_swap_memory) * 1024 * 1024,
       port_bindings={5432: 5432},
       environment={
           "POSTGRESQL_REPLICATION_MODE": "master",
@@ -119,6 +122,7 @@ if __name__ == '__main__':
           cpu_period=100000,
           cpu_quota=int(args.replica_cpu * 100000),
           mem_limit=int(args.replica_memory) * 1024 * 1024,
+          memswap_limit=int(args.replica_swap_memory) * 1024 * 1024,
           port_bindings={5432: 5433 + i},
           environment={
               "POSTGRESQL_REPLICATION_MODE": "slave",
@@ -184,7 +188,9 @@ if __name__ == '__main__':
     'primary_cpu': args.primary_cpu,
     'replica_cpu': args.replica_cpu,
     'primary_memory': args.primary_memory,
+    'primary_swap_memory': args.primary_swap_memory,
     'replica_memory': args.replica_memory,
+    'replica_swap_memory': args.replica_swap_memory,
   }
 
   if args.output:
