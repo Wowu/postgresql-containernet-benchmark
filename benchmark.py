@@ -25,9 +25,9 @@ def parse_args():
   parser.add_argument('--primary-cpu', type=float, default=0.5, help='Primary CPU quota (default: 0.5)')
   parser.add_argument('--replica-cpu', type=float, default=0.5, help='Replica CPU quota (default: 0.5)')
   parser.add_argument('--primary-memory', type=float, default=1000, help='Primary memory quota (in MB, default: 1000)')
-  parser.add_argument('--primary-swap-memory', type=float, default=0, help='Primary swap memory quota (in MB, default: 0)')
+  parser.add_argument('--primary-swap-memory', type=float, default=1000, help='Primary swap memory quota (in MB, default: 1000)')
   parser.add_argument('--replica-memory', type=float, default=1000, help='Replica memory quota (in MB, default: 1000)')
-  parser.add_argument('--replica-swap-memory', type=float, default=0, help='Replica swap memory quota (in MB, default: 0)')
+  parser.add_argument('--replica-swap-memory', type=float, default=1000, help='Replica swap memory quota (in MB, default: 1000)')
 
   return parser.parse_args()
 
@@ -80,6 +80,15 @@ def parse_sysbench_output(output):
     'latency_max': float(latency_max),
     'latency_95th': float(latency_95th),
   }
+
+
+def remove_ansi_escape_sequences(s: str) -> str:
+  return re.sub(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])', '', s)
+
+
+def execute_sql(container, sql: str) -> str:
+  output = container.cmd(f"PGPASSWORD=postgres psql -U postgres -A -t -X -c \"{sql}\"")
+  return remove_ansi_escape_sequences(output).strip();
 
 
 if __name__ == '__main__':
@@ -156,8 +165,15 @@ if __name__ == '__main__':
   net.addLink(benchmark, s1, cls=TCLink, bw=100)
   net.start()
 
-  green('====> Wait for replication setup')
-  time.sleep(10)
+  green('====> Wait until all replicas are ready')
+  for _ in range(20):
+    replica_count = execute_sql(primary, "select count(*) from pg_stat_replication where application_name = 'walreceiver' and sync_state = 'sync';")
+    print("Ready replicas: ", replica_count)
+
+    if replica_count == str(args.replicas):
+      break
+    else:
+      time.sleep(4)
 
   green('====> Prepare benchmark')
   print(benchmark.cmd("sysbench --db-driver=pgsql --pgsql-host=10.1.0.100 --pgsql-user=postgres --pgsql-password=postgres --pgsql-db=postgres oltp_read_write prepare"))
